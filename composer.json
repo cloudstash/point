@@ -8,5 +8,9 @@
       "name": "Viktor Kulikov",
       "email": "bezdoom@gmail.com"
     }
-  ]
+  ],
+  "require": {
+    "twig/twig": "1.6.5",
+    "swiftmailer/swiftmailer": "v5.3.1"
+  }
 }
