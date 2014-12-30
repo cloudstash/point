@@ -9,7 +9,8 @@
   ],
   "autoload": {
     "psr-0": {
-      "Cloudstash\\": "src/"
+      "Cloudstash\\": "src/",
+      "Controller\\": "application/src/"
     }
   },
   "require": {
