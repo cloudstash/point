@@ -1,0 +1,12 @@
+{
+  "name": "cloudstash/point",
+  "description": "Point MVC Framework",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Viktor Kulikov",
+      "email": "bezdoom@gmail.com"
+    }
+  ]
+}
