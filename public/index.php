@@ -2,4 +2,4 @@
 
 require_once "../vendor/autoload.php";
 
-print "Hello";
+print \Cloudstash\Point\Hello::sayHello();

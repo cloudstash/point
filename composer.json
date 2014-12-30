@@ -1,15 +1,19 @@
 {
   "name": "cloudstash/point",
   "description": "Point MVC Framework",
-  "minimum-stability": "stable",
-  "license": "proprietary",
   "authors": [
     {
       "name": "Viktor Kulikov",
       "email": "bezdoom@gmail.com"
     }
   ],
+  "autoload": {
+    "psr-0": {
+      "Cloudstash\\": "src/"
+    }
+  },
   "require": {
+    "php": ">=5.5.0",
     "twig/twig": "1.6.5",
     "swiftmailer/swiftmailer": "v5.3.1"
   }
