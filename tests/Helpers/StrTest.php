@@ -1,8 +1,6 @@
 <?php
 
-namespace Point\Helper;
-
-class Str extends \TestCase
+class Test_Helpers_Str extends \TestCase
 {
     public function testContains()
     {
