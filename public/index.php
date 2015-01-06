@@ -13,6 +13,10 @@ $test = [
     ]
 ];
 
+$ins = new \Doctrine\Instantiator\Instantiator();
+
+$home_controller = $ins->instantiate(Controller\Home::class);
+
 print_r(Cloudstash\Point\Helper\Arr::toAssocOneToOne($test, 'id', 'name'));
 
-print (new Controller\Home())->actionDefault();
+print $home_controller->actionDefault();

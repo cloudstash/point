@@ -5,27 +5,29 @@ namespace Cloudstash\Point\Helper;
 class Arr
 {
     /**
-     * @param array|object $source Original array, contained $key
+     * Determine if two associative arrays are similar
+     *
+     * Both arrays must have the same indexes with identical values
+     * without respect to key ordering
+     *
+     * @param array $a
+     * @param array $b
+     * @return bool
+     */
+    public static function similar(array $a, array $b)
+    {
+        return ($a === $b);
+    }
+
+    /**
+     * @param array $source Original array, contained $key
      * @param string $key Key to return
      * @param mixed $default Default value, if $key does not exists
      * @return mixed
      */
     public static function get($source, $key, $default = null)
     {
-        if (is_array($source)) {
-            if (!array_key_exists($key, $source))
-                return $default;
-
-            return $source[$key];
-        } elseif (is_object($source)) {
-            if (!property_exists($source, $key)) {
-                return $default;
-            }
-
-            return $source->{$key};
-        }
-
-        return $default;
+        return isset($source[$key]) ? $source[$key] : $default;
     }
 
     /**
