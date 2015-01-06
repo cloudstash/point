@@ -183,17 +183,25 @@ class Arr
     public static function getByIndex(array $source, $index = ':first', $default = null)
     {
         if (empty($source))
-            return null;
+            return $default;
 
         $keys = array_keys($source);
 
-        if ($index == ':first') {
-            $index = $keys[0];
-        } elseif ($index == ':last') {
-            $index = $keys[count($keys) - 1];
+        if (is_string($index)) {
+            $index = mb_strtolower($index, Str::MBSTRING_CHARSET);
+
+            if ($index == ':first') {
+                $index = 0;
+            } elseif ($index == ':last') {
+                $index = (int) (count($keys) - 1);
+            }
         }
 
-        return self::get($source, $index, $default);
+        if (!isset($keys[$index])) {
+            return $default;
+        }
+
+        return self::get($source, $keys[$index], $default);
     }
 
     /**
