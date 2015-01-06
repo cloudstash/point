@@ -175,33 +175,45 @@ class Arr
     }
 
     /**
-     * @param array $source Original array
-     * @return mixed Return first item from array
+     * @param array $source
+     * @param string $index
+     * @param mixed $default
+     * @return mixed
      */
-    public static function getFirst(array $source)
+    public static function getByIndex(array $source, $index = ':first', $default = null)
     {
         if (empty($source))
             return null;
 
         $keys = array_keys($source);
-        $first_key = $keys[0];
 
-        return $source[$first_key];
+        if ($index == ':first') {
+            $index = $keys[0];
+        } elseif ($index == ':last') {
+            $index = $keys[count($keys) - 1];
+        }
+
+        return self::get($source, $index, $default);
     }
 
     /**
      * @param array $source Original array
+     * @param mixed $default Default value if key with index does not exist
+     * @return mixed Return first item from array
+     */
+    public static function getFirst(array $source, $default = null)
+    {
+        return self::getByIndex($source, ':first', $default);
+    }
+
+    /**
+     * @param array $source Original array
+     * @param mixed $default Default value if key with index does not exist
      * @return mixed Return last item from array
      */
-    public static function getLast(array $source)
+    public static function getLast(array $source, $default = null)
     {
-        if (empty($source))
-            return null;
-
-        $keys = array_keys($source);
-        $last_key = $keys[count($keys) - 1];
-
-        return $source[$last_key];
+        return self::getByIndex($source, ':last', $default);
     }
 
     /**
