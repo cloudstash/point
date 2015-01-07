@@ -2,12 +2,12 @@
 
 namespace Controller;
 
-use Doctrine\Instantiator\Instantiator;
+use Cloudstash\Point\HTTP\HttpRequest;
 
 class Home
 {
     public function actionDefault()
     {
-        return "Test";
+        var_dump(HttpRequest::Instance()->getVariables());
     }
 }

@@ -3,70 +3,101 @@
 namespace Cloudstash\Point\Routing;
 
 use Cloudstash\Point\Helper\Arr;
-use Cloudstash\Point\Helper\Str;
-use Cloudstash\Point\HTTP\Uri;
+use Cloudstash\Point\Helper\Routing;
 
 class Route
 {
-    protected $available_method = [];
+    const TYPE_BLOCK = 'block';
+    const TYPE_VARIABLE = 'variable';
 
     protected $pattern_strict = [];
-
     protected $values = [];
+    protected $handler = null;
+
+    public function __construct($handler)
+    {
+        $this->handler = $handler;
+    }
 
     /**
-     * @return string
+     * @return callable
      */
-    protected function getCurrentUri()
+    public function getHandler()
     {
-        $requestPath = (new Uri())->getRequestPath();
-        return Str::RemoveFirst('/', $requestPath);
+        return $this->handler;
     }
 
-    public function __construct($method = ['GET', 'POST'])
+    /**
+     * @param string $name
+     * @param mixed|callback $matcher
+     * @return $this
+     */
+    public function registerVar($name, $matcher)
     {
-        if (!is_array($method)) {
-            $method = (array) $method;
-        }
-
-        $this->available_method = $method;
-    }
-
-    public function registerBlock($name, $matcher = null)
-    {
-        $this->pattern_strict[$name] = $matcher;
+        $this->pattern_strict[] = [
+            'type' => self::TYPE_VARIABLE,
+            'name' => $name,
+            'matcher' => $matcher
+        ];
 
         return $this;
     }
 
+    /**
+     * @param mixed|callback $matcher
+     * @return $this
+     */
+    public function registerBlock($matcher)
+    {
+        $this->pattern_strict[] = [
+            'type' => self::TYPE_BLOCK,
+            'matcher' => $matcher
+        ];
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
     public function getValues()
     {
         return (array) $this->values;
     }
 
-    public function isCurrent()
+    public function isCurrent($url)
     {
-        $uriArray = explode('/', $this->getCurrentUri());
+        $uriArray = Routing::explodeUrl($url);
 
-        $index = -1;
-
-        foreach ($this->pattern_strict as $name => $matcher) {
-            $index++;
-            $partial = Arr::get($uriArray, $index);
+        foreach ($this->pattern_strict as $index => $segment) {
+            $partial = Arr::get($uriArray, $index, null);
 
             if (is_null($partial)) {
                 return false;
             }
 
+            $type = Arr::get($segment, 'type', self::TYPE_BLOCK);
+            $matcher = Arr::get($segment, 'matcher', null);
+            $name = Arr::get($segment, 'name', "var{$index}");
+
+            if (is_null($matcher)) {
+                return false;
+            }
+
             if ($partial == $matcher) {
-                $this->values[$name] = $partial;
+                if ($type == self::TYPE_VARIABLE) {
+                    $this->values[$name] = $partial;
+                }
 
                 continue;
             }
 
             if (is_callable($matcher)) {
                 if (call_user_func_array($matcher, [$partial])) {
-                    $this->values[$name] = $partial;
+                    if ($type == self::TYPE_VARIABLE) {
+                        $this->values[$name] = $partial;
+                    }
+
                     continue;
                 }
             }

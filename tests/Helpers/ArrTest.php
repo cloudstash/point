@@ -32,6 +32,23 @@ class Test_Helpers_Arr extends \TestCase
         // сверяем два различных массива
         $result = \Cloudstash\Point\Helper\Arr::similar($source, $nested);
         $this->assertFalse($result, 'Similar to NOT equals arrays');
+
+        $source = ['test', 123, 123.321, true];
+        $matcher = ['test', '123', '123.321', 'true'];
+
+        // сверяем с явным указанием типов
+        $result = \Cloudstash\Point\Helper\Arr::similar($source, $source, true);
+        $this->assertTrue($result, 'Similar to NOT equals arrays (STRICT mode)');
+
+        $result = \Cloudstash\Point\Helper\Arr::similar($source, $matcher, true);
+        $this->assertFalse($result, 'Similar are equals arrays (STRICT mode)');
+
+        // сверяем с неявным указанием типов
+        $result = \Cloudstash\Point\Helper\Arr::similar($source, $source, false);
+        $this->assertTrue($result, 'Similar to NOT equals arrays (NOT STRICT mode)');
+
+        $result = \Cloudstash\Point\Helper\Arr::similar($source, $matcher, false);
+        $this->assertTrue($result, 'Similar are equals arrays (NOT STRICT mode)');
     }
 
     public function testGet()

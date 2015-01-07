@@ -62,6 +62,21 @@ class Test_Helpers_Str extends \TestCase
         $this->assertEquals($source, $result);
     }
 
+    public function testRemoveLast()
+    {
+        $source = '/test/case/url/';
+
+        // удаляем, так как строка действительно найдена в конце текущей
+        $right_result = "/test/case/url";
+        $result = \Cloudstash\Point\Helper\Str::RemoveLast('/', $source);
+        $this->assertEquals($right_result, $result);
+
+        // не удаляем, так как строка не найдена в конце текущей
+        $right_result = $source;
+        $result = \Cloudstash\Point\Helper\Str::RemoveLast('///', $source);
+        $this->assertEquals($right_result, $result);
+    }
+
     public function testRevers()
     {
         // разворчиваем строку
@@ -89,6 +104,18 @@ class Test_Helpers_Str extends \TestCase
         $source = "  Привет!  ";
         $right_result = "Привет!";
         $result = \Cloudstash\Point\Helper\Str::Trim($source);
+        $this->assertEquals($right_result, $result);
+
+        $source = '  /test/case/url/   ';
+
+        // обрезаем лишние пробелы и удаляем, так как строка действительно найдена в начале и конце текущей
+        $right_result = "test/case/url";
+        $result = \Cloudstash\Point\Helper\Str::Trim($source, '/', '/');
+        $this->assertEquals($right_result, $result);
+
+        // обрезаем лишние пробелы и  не удаляем, так как строка не найдена в начале и конце текущей
+        $right_result = "/test/case/url/";
+        $result = \Cloudstash\Point\Helper\Str::Trim($source, '///', '///');
         $this->assertEquals($right_result, $result);
     }
 }

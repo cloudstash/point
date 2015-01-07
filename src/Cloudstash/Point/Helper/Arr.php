@@ -12,11 +12,16 @@ class Arr
      *
      * @param array $a
      * @param array $b
+     * @param bool $strict
      * @return bool
      */
-    public static function similar(array $a, array $b)
+    public static function similar(array $a, array $b, $strict = true)
     {
-        return ($a === $b);
+        if ($strict) {
+            return ($a === $b);
+        }
+
+        return ($a == $b);
     }
 
     /**

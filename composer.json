@@ -17,6 +17,7 @@
     "php": ">=5.5.0",
     "twig/twig": "1.6.5",
     "swiftmailer/swiftmailer": "v5.3.1",
+    "doctrine/instantiator": "1.0.4",
     "phpunit/phpunit": "4.4.1"
   }
 }

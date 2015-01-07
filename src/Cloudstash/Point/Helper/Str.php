@@ -69,12 +69,30 @@ class Str
      */
     static public function RemoveFirst($needle, $string, $charset = self::MBSTRING_CHARSET)
     {
-        if(!static::StartWith($needle, $string, $charset))
+        if(!static::StartWith($needle, $string, $charset)) {
             return $string;
+        }
 
         $needle_length = mb_strlen($needle, $charset);
         $total_length = mb_strlen($string, $charset);
         return mb_substr($string, $needle_length, $total_length - $needle_length, $charset);
+    }
+
+    /**
+     * @param string $needle
+     * @param string $string
+     * @param string $charset
+     * @return string
+     */
+    static public function RemoveLast($needle, $string, $charset = self::MBSTRING_CHARSET)
+    {
+        if(!static::EndWith($needle, $string, $charset)) {
+            return $string;
+        }
+
+        $needle_length = mb_strlen($needle, $charset);
+        $total_length = mb_strlen($string, $charset);
+        return mb_substr($string, 0, $total_length - $needle_length, $charset);
     }
 
     /**
@@ -87,25 +105,38 @@ class Str
      */
     static public function Reverse($string, $charset = self::MBSTRING_CHARSET)
     {
-        $output_string = "";
+        $output_string = self::STRING_EMPTY;
         $string_length = mb_strlen($string, $charset);
 
-        for($i = $string_length - 1; $i >= 0; --$i)
+        for($i = $string_length - 1; $i >= 0; --$i) {
             $output_string .= mb_substr($string, $i, 1, $charset);
+        }
 
         return $output_string;
     }
 
     /**
-     * @static
-     * @param string $string
+     * @param $string
+     * @param string $removeFirst
+     * @param string $removeLast
+     * @param string $charset
      * @return string
      *
      * Обрезает лишние пробелы по краям с поддержкой многобайтовой кодировки (UTF-8)
      */
-    static public function Trim($string)
+    static public function Trim($string, $removeFirst = null, $removeLast = null, $charset = self::MBSTRING_CHARSET)
     {
-        return preg_replace("/(^\\s+)|(\\s+$)/us", "", $string);
+        $string = preg_replace("/(^\\s+)|(\\s+$)/us", "", $string);
+
+        if (is_string($removeFirst)) {
+            $string = self::RemoveFirst($removeFirst, $string, $charset);
+        }
+
+        if (is_string($removeLast)) {
+            $string = self::RemoveLast($removeLast, $string, $charset);
+        }
+
+        return $string;
     }
 
     /**
@@ -119,6 +150,7 @@ class Str
     static public function Translate($string, $charset = self::MBSTRING_CHARSET)
     {
         static $rus, $lat;
+
         if ( is_null( $rus ) )
         {
             $rus = [
@@ -144,6 +176,7 @@ class Str
                 $lat[] = mb_substr( $latChars, $i, 1, $charset );
             }
         }
+
         return str_replace( $rus, $lat, $string );
     }
 
@@ -176,10 +209,11 @@ class Str
 
         $result = mb_substr( self::StrReplace(self::Trim($input), $patterns), 0, $substring_length, $charset );
 
-        if ($to_lower === true)
+        if ($to_lower === true) {
             return mb_strtolower($result, $charset);
-        else
-            return $result;
+        }
+
+        return $result;
     }
 
     /**
@@ -234,13 +268,39 @@ class Str
      * @param string $end
      * @return string
      */
-    static public function SubstringFullWord($string, $maxLength = 250, $end = "&hellip;")
+    static public function SubstringFullWord($string, $maxLength = 250, $end = "&hellip;", $charset = self::MBSTRING_CHARSET)
     {
         $line = $string;
 
-        if (mb_strlen($string, self::MBSTRING_CHARSET) > $maxLength)
-            $line = mb_substr($string, 0, mb_strpos($string, ' ', $maxLength, self::MBSTRING_CHARSET), self::MBSTRING_CHARSET) . $end;
+        if (mb_strlen($string, self::MBSTRING_CHARSET) > $maxLength) {
+            $line = mb_substr($string, 0, mb_strpos($string, ' ', $maxLength, $charset), $charset) . $end;
+        }
 
         return $line;
+    }
+
+    /**
+     * @param string $delimiter
+     * @param string|callback $string
+     * @param callback $postprocessor
+     * @return array
+     */
+    public static function explode($delimiter, $string, $postprocessor = null)
+    {
+        if (is_callable($string)) {
+            $string = (string) call_user_func_array($string, [$delimiter]);
+        }
+
+        if (!$string or $string == $delimiter) {
+            return [];
+        }
+
+        $result_array = explode($delimiter, $string);
+
+        if (is_callable($postprocessor)) {
+            return array_map($postprocessor, $result_array);
+        }
+
+        return $result_array;
     }
 }

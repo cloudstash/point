@@ -27,7 +27,7 @@ class Uri
         if (!$this->url)
         {
             $protocol = $this->IsSecureConnection() ? "https://" : "http://";
-            $this->url = $protocol . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+            $this->url = $protocol . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
         }
 
         $this->segments = parse_url($this->url);
