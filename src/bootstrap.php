@@ -8,4 +8,5 @@ require_once "../vendor/autoload.php";
 /**
  * Global init scripts
  */
+require_once "_init/routing/functions.php";
 require_once "_init/routing/default_filters.php";

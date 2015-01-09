@@ -11,8 +11,13 @@ class Home
         print "Welcome to us";
     }
 
-    public function actionHomeMe()
+    public function actionHomeMe($id)
     {
-        print "HomeMe # " . HttpRequest::Instance()->getVariable('id', 0);
+        print "HomeMe # " . $id;
+    }
+
+    public function actionRightNow()
+    {
+        print "YYYESSS!";
     }
 }

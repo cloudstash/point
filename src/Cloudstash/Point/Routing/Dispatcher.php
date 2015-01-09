@@ -8,13 +8,13 @@ use Cloudstash\Point\Helper\Str;
 use Cloudstash\Point\HTTP\HttpRequest;
 use Cloudstash\Point\HTTP\Server;
 use Cloudstash\Point\HTTP\Uri;
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use Doctrine\Instantiator\Instantiator;
 
 class Dispatcher
 {
-    const PREG_VARIABLE = '/^<([A-Za-z0-9_]+)(:|@)([A-Za-z0-9_\-]+)>$/im';
+    const PREG_VARIABLE = '/^<([A-Za-z0-9_]+)(@*)([A-Za-z0-9_\-]*)>$/im';
 
-    const MODE_SET = ':';
     const MODE_FILTER = '@';
 
     /**
@@ -121,12 +121,13 @@ class Dispatcher
     }
 
     /**
-     * @param string $method
+     * @param string $name
+     * @param array|string $method
      * @param Route|string $pattern
      * @param string|callback $handler
      * @return $this
      */
-    public function register($method, $pattern, $handler)
+    public function register($name, $pattern, $handler, $method = ['GET', 'POST'])
     {
         $pattern = Routing::explodeUrl($pattern);
 
@@ -137,13 +138,7 @@ class Dispatcher
             foreach ($pattern as $segment) {
                 if (preg_match(self::PREG_VARIABLE, $segment, $matches)) {
                     $var = Arr::get($matches, 1);
-                    $type = Arr::get($matches, 2);
                     $value = Arr::get($matches, 3);
-
-                    if ($type == self::MODE_SET) {
-                        $route->registerVar($var, $value);
-                        continue;
-                    }
 
                     $route->registerVar($var, Arr::get($this->filters, $value, $value));
 
@@ -154,7 +149,7 @@ class Dispatcher
             }
         }
 
-        $this->collection[] = [
+        $this->collection[$name] = [
             'method' => $this->prepareMethod($method),
             'route' => $route
         ];
@@ -162,7 +157,7 @@ class Dispatcher
         return $this;
     }
 
-    protected function callAction($handler)
+    protected function callAction($handler, $throw = false)
     {
         $variables = [];
 
@@ -173,10 +168,18 @@ class Dispatcher
 
         HttpRequest::Instance()->setVariables($variables);
 
+        // if right callable - use it
         if (is_callable($handler)) {
-            return call_user_func_array($handler, []);
+            return call_user_func_array($handler, $variables);
+        } else {
+            // Replace all variables in handler (if need)
+            $handler = preg_replace_callback('/\#{([A-z0-9\-_]+)}/', function($matches) use ($variables) {
+                $var_name = Arr::get($matches, 1);
+                return Arr::get($variables, $var_name, $var_name);
+            }, $handler);
         }
 
+        // or extract it from pattern
         if (preg_match('/^([A-z0-9_\.]+)@([A-z0-9_]+)$/im', $handler, $matches)) {
             $namespace = Arr::get($matches, 1);
             $namespace = explode('.', $namespace);
@@ -185,12 +188,42 @@ class Dispatcher
             $action = Arr::get($matches, 2);
             $action = 'action' . ucfirst($action);
 
-            $controller = (new Instantiator())->instantiate($namespace);
+            try
+            {
+                $controller = (new Instantiator())->instantiate($namespace);
 
-            if (method_exists($controller, $action)) {
-                return (new \ReflectionMethod($controller, $action))->invoke($controller);
+                if (method_exists($controller, $action)) {
+                    return (new \ReflectionMethod($controller, $action))->invokeArgs($controller, $variables);
+                }
+            }
+            catch (InvalidArgumentException $e)
+            {
+                return $this->callAction($this->notFoundRoute, true);
             }
         }
+
+        if ($throw) {
+            throw new \Exception('What a fuckhell');
+        }
+
+        return $this->callAction($this->notFoundRoute, true);
+    }
+
+    /**
+     * @param $name
+     * @param array $params
+     * @return null|string
+     */
+    public function toUrl($name, array $params = [])
+    {
+        $route = Arr::get($this->collection, $name, []);
+        $route = Arr::get($route, 'route');
+
+        if (!($route instanceof Route)) {
+            return null;
+        }
+
+        return $route->toUrl($params);
     }
 
     /**
@@ -206,7 +239,7 @@ class Dispatcher
 
         $requestPath = $uri->getRequestPath();
 
-        foreach ($this->collection as $index => $routeSettings) {
+        foreach ($this->collection as $routeName => $routeSettings) {
             /**
              * @var Route $route
              */

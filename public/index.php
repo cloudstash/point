@@ -2,6 +2,8 @@
 
 $time = microtime(true);
 
+#region Remove this region on production
+
 register_shutdown_function(function() use ($time) {
     $xhprof_data = xhprof_disable();
 
@@ -17,6 +19,13 @@ register_shutdown_function(function() use ($time) {
 
 xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY);
 
+#endregion
+
 require_once "../application/bootstrap.php";
+
+$url = route_to_url('simple', ['a' => 'WhatAFuck', 'b' => 999823, 'c' => 98.1234]);
+print '<a href="' . $url .'">' . $url . '</a>';
+
+print "<hr>";
 
 \Cloudstash\Point\Routing\Dispatcher::Instance()->handleCurrent();

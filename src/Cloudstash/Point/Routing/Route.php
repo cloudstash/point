@@ -65,9 +65,45 @@ class Route
         return (array) $this->values;
     }
 
+    /**
+     * @param array $params
+     * @return string
+     */
+    public function toUrl(array $params = [])
+    {
+        $url = '';
+
+        foreach ($this->pattern_strict as $index => $segment) {
+            $type = Arr::get($segment, 'type', self::TYPE_BLOCK);
+            $matcher = Arr::get($segment, 'matcher', '');
+
+            if ($type == self::TYPE_BLOCK) {
+                $url .= '/' . $matcher;
+                continue;
+            }
+
+            $name = Arr::get($segment, 'name', "var{$index}");
+            $value = Arr::get($params, $name, $name);
+
+            if (is_callable($matcher)) {
+                if (!call_user_func_array($matcher, [$value])) {
+                    return $url;
+                }
+            }
+
+            $url .= '/' . $value;
+        }
+
+        return $url;
+    }
+
     public function isCurrent($url)
     {
         $uriArray = Routing::explodeUrl($url);
+
+        if (count($this->pattern_strict) != count($uriArray)) {
+            return false;
+        }
 
         foreach ($this->pattern_strict as $index => $segment) {
             $partial = Arr::get($uriArray, $index, null);
@@ -80,26 +116,29 @@ class Route
             $matcher = Arr::get($segment, 'matcher', null);
             $name = Arr::get($segment, 'name', "var{$index}");
 
-            if (is_null($matcher)) {
+            // block must be strong assert with url partial
+            if ($type == self::TYPE_BLOCK) {
+                if ($partial == $matcher) {
+                    continue;
+                }
+
                 return false;
             }
 
-            if ($partial == $matcher) {
-                if ($type == self::TYPE_VARIABLE) {
-                    $this->values[$name] = $partial;
-                }
-
-                continue;
-            }
-
+            // if it is variable with callable filter
             if (is_callable($matcher)) {
                 if (call_user_func_array($matcher, [$partial])) {
-                    if ($type == self::TYPE_VARIABLE) {
-                        $this->values[$name] = $partial;
-                    }
-
+                    $this->values[$name] = $partial;
                     continue;
                 }
+
+                return false;
+            }
+
+            // if not callable then just set to variable all segment value
+            if ($type == self::TYPE_VARIABLE) {
+                $this->values[$name] = $partial;
+                continue;
             }
 
             return false;
