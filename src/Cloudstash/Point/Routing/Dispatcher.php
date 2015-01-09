@@ -56,13 +56,16 @@ class Dispatcher
 
     /**
      * @param string $name
-     * @param callback $callback
+     * @param callable $callable
+     * @throws \Exception
      */
-    public static function registerFilter($name, $callback)
+    public static function registerFilter($name, $callable)
     {
-        if (is_callable($callback)) {
-            self::Instance()->filters[$name] = $callback;
+        if (!is_callable($callable)) {
+            throw new \Exception("Not callable function to use in filter");
         }
+
+        self::Instance()->filters[$name] = $callable;
     }
 
     /**
