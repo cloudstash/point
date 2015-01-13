@@ -16,14 +16,14 @@ class Test_Helpers_Routing extends \TestCase
         $url = '      /controller/action////id/1////';
         $right = ['controller', 'action', 'id', '1'];
         $result = \Cloudstash\Point\Helper\Routing::explodeUrl($url);
-        $result = \Cloudstash\Point\Helper\Arr::similar($right, $result, false);
+        $result = \Cloudstash\Helper\Arr::similar($right, $result, false);
 
         $this->assertTrue($result, 'Wrong URL explode');
 
         $url = '     /     ';
         $right = [];
         $result = \Cloudstash\Point\Helper\Routing::explodeUrl($url);
-        $result = \Cloudstash\Point\Helper\Arr::similar($right, $result, false);
+        $result = \Cloudstash\Helper\Arr::similar($right, $result, false);
 
         $this->assertTrue($result, 'Wrong empty URL explode');
     }

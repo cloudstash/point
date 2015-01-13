@@ -2,9 +2,9 @@
 
 namespace Cloudstash\Point\Routing;
 
-use Cloudstash\Point\Helper\Arr;
+use Cloudstash\Helper\Arr;
+use Cloudstash\Helper\Str;
 use Cloudstash\Point\Helper\Routing;
-use Cloudstash\Point\Helper\Str;
 use Cloudstash\Point\HTTP\HttpRequest;
 use Cloudstash\Point\HTTP\Server;
 use Cloudstash\Point\HTTP\Uri;
@@ -13,7 +13,11 @@ use Doctrine\Instantiator\Instantiator;
 
 class Dispatcher
 {
-    const PREG_VARIABLE = '/^<([A-Za-z0-9_]+)(@*)([A-Za-z0-9_\-]*)>$/im';
+    const PREG_VARIABLE = '/^<([A-Za-z0-9_\-]+)(@*)([A-Za-z0-9_\-]*)>$/im';
+    const PREG_VAR_IN_HANDLER_STRING = '/\#{([A-z0-9\-_]+)}/';
+    const PREG_HANDLER_PATTERN = '/^([A-z0-9_\-\.]+)@([A-z0-9_\-]+)$/im';
+
+    const PREFIX_ACTION_METHOD = 'action';
 
     const MODE_FILTER = '@';
 
@@ -173,20 +177,20 @@ class Dispatcher
             return call_user_func_array($handler, $variables);
         } else {
             // Replace all variables in handler (if need)
-            $handler = preg_replace_callback('/\#{([A-z0-9\-_]+)}/', function($matches) use ($variables) {
+            $handler = preg_replace_callback(self::PREG_VAR_IN_HANDLER_STRING, function($matches) use ($variables) {
                 $var_name = Arr::get($matches, 1);
                 return Arr::get($variables, $var_name, $var_name);
             }, $handler);
         }
 
         // or extract it from pattern
-        if (preg_match('/^([A-z0-9_\.]+)@([A-z0-9_]+)$/im', $handler, $matches)) {
+        if (preg_match(self::PREG_HANDLER_PATTERN, $handler, $matches)) {
             $namespace = Arr::get($matches, 1);
             $namespace = explode('.', $namespace);
             $namespace = '\\' . implode('\\', $namespace);
 
             $action = Arr::get($matches, 2);
-            $action = 'action' . ucfirst($action);
+            $action = self::PREFIX_ACTION_METHOD . ucfirst($action);
 
             try
             {

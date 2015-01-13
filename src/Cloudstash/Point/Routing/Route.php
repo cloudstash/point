@@ -2,7 +2,7 @@
 
 namespace Cloudstash\Point\Routing;
 
-use Cloudstash\Point\Helper\Arr;
+use Cloudstash\Helper\Arr;
 use Cloudstash\Point\Helper\Routing;
 
 class Route
@@ -97,6 +97,10 @@ class Route
         return $url;
     }
 
+    /**
+     * @param string $url
+     * @return bool
+     */
     public function isCurrent($url)
     {
         $uriArray = Routing::explodeUrl($url);

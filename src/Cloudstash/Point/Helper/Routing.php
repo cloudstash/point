@@ -2,6 +2,8 @@
 
 namespace Cloudstash\Point\Helper;
 
+use Cloudstash\Helper\Str;
+
 class Routing
 {
     /**

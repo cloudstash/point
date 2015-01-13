@@ -23,7 +23,7 @@ xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY);
 
 require_once "../application/bootstrap.php";
 
-$url = route_to_url('simple', ['a' => 'WhatAFuck', 'b' => 999823, 'c' => 98.1234]);
+$url = route_to_url('simple', ['a' => 'bezdoom@gmail.com', 'b' => 12345, 'c' => '192.168.1.1']);
 print '<a href="' . $url .'">' . $url . '</a>';
 
 print "<hr>";

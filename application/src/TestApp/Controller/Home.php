@@ -2,8 +2,6 @@
 
 namespace TestApp\Controller;
 
-use Cloudstash\Point\HTTP\HttpRequest;
-
 class Home
 {
     public function actionDefault()

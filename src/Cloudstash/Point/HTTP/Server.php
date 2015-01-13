@@ -2,7 +2,7 @@
 
 namespace Cloudstash\Point\HTTP;
 
-use Cloudstash\Point\Helper\Arr;
+use Cloudstash\Helper\Arr;
 
 class Server
 {

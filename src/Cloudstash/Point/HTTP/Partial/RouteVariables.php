@@ -2,7 +2,7 @@
 
 namespace Cloudstash\Point\HTTP\Partial;
 
-use Cloudstash\Point\Helper\Arr;
+use Cloudstash\Helper\Arr;
 
 trait RouteVariables
 {
